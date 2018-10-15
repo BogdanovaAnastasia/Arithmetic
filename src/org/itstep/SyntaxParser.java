@@ -56,19 +56,53 @@ public class SyntaxParser {
         switch(nextTok.tokType) {
             case MUL: {
                 tokens.poll();
-                int t = parseTerminal(tokens);
+                int t = parseFunction(tokens);
                 return parseMultiplicationRec(prev*t,tokens);
             }
 
             case DIV: {
                 tokens.poll();
-                int t = parseTerminal(tokens);
+                int t = parseFunction(tokens);
                 return parseMultiplicationRec(prev/t,tokens);
             }
 
             default:
                 return prev;
         }
+    }
+
+    private static int parseFunction(Deque<Token> tokens) throws UnexpectedTokenException {
+        int f = parseTerminal(tokens);
+        return parseFunctionRec(f,tokens);
+    }
+
+    private static int parseFunctionRec(int prev, Deque<Token> tokens) throws UnexpectedTokenException {
+        //F is F%
+        if (tokens.isEmpty())
+            return prev;
+
+        Token nextTok = tokens.peek();
+        switch(nextTok.tokType) {
+            case PERCENT: {
+                tokens.poll();
+                return parseFunctionRec((prev/100),tokens);
+            }
+
+            case FACT: {
+                tokens.poll();
+                return parseFunctionRec(findFact(prev),tokens);
+            }
+
+            default:
+                return prev;
+        }
+    }
+    static int findFact(int n){
+        int result = 1;
+        for (int i = 1; i <=n; i ++){
+            result = result*i;
+        }
+        return result;
     }
 
     private static int parseTerminal(Deque<Token> tokens) throws UnexpectedTokenException {
