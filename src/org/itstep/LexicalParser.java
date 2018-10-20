@@ -42,7 +42,7 @@ public final class LexicalParser {
             case ')':
                 return new Token(TokenType.CLOSE,expression.subSequence(0,1));
             case '^':
-                return new Token(TokenType.SIGN,expression.subSequence(0,1));
+                return new Token(TokenType.POW,expression.subSequence(0,1));
 
 
             default:
