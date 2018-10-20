@@ -48,7 +48,7 @@ public class SyntaxParser {
     }
 
     private static int parseMultiplicationRec(int prev, Deque<Token> tokens) throws UnexpectedTokenException {
-        //M is T*M or T/M or T, where T is terminal
+        //M is F*M or F/M or F, where F is function
         if (tokens.isEmpty())
             return prev;
 
@@ -77,7 +77,7 @@ public class SyntaxParser {
     }
 
     private static int parseFunctionRec(int prev, Deque<Token> tokens) throws UnexpectedTokenException {
-        //M is T*M or T/M or T, where T is terminal
+        //F is F(T,T) or T, where T is terminal
         if (tokens.isEmpty())
             return prev;
 
@@ -87,14 +87,14 @@ public class SyntaxParser {
             case POW: {
                 tokens.poll();
                 int t = parseTerminal(tokens);
-                return parseMultiplicationRec((int)Math.pow(prev,t),tokens);
+                return parseFunctionRec((int)Math.pow(prev,t),tokens);
             }
 
             default:
                 return prev;
         }
     }
-    
+
     private static int parseTerminal(Deque<Token> tokens) throws UnexpectedTokenException {
         //T is N or (A), where N is number and A is a nested expression
         Token tok = tokens.poll();
