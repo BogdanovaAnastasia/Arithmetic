@@ -115,48 +115,41 @@ public class SyntaxParser {
 
     private static int parseTerminal(Deque<Token> tokens) throws UnexpectedTokenException {
         //T is N or (A), where N is number and A is a nested expression
-        Token tok = tokens.peek();
+        Token tok = tokens.poll();
         switch (tok.tokType) {
             case NUMBER:
-                int num = parsePostFunction(tokens);
-                return num;
+                int num = Integer.parseInt(tok.data.toString());
+                return parsePostFunctionRec(num,tokens);
 
             case OPEN:
-                tokens.poll();
                 int res = parseAddition(tokens);
                 Token nextToken = tokens.poll();
                 if( TokenType.CLOSE != nextToken.tokType)
                     throw new UnexpectedTokenException(nextToken);
-                return res;
+                return parsePostFunctionRec(res,tokens);
 
             default:
                 throw new UnexpectedTokenException(tok);
         }
     }
 
-
-    private static int parsePostFunction(Deque<Token> tokens) throws UnexpectedTokenException {
-        int t = Integer.parseInt(tokens.poll().data.toString());
-        return parsePostFunctionRec(t,tokens);
-    }
-
     private static int parsePostFunctionRec(int prev, Deque<Token> tokens) throws UnexpectedTokenException {
-        //
+        //PF is T! or T% or T
         if (tokens.isEmpty())
             return prev;
 
         Token nextTok = tokens.peek();
-        switch(nextTok.tokType) {
 
+        switch(nextTok.tokType) {
             case FACT:
                 tokens.poll();
                 int res = 1;
-                for (int i = 1; i <=prev; i ++)
+                for (int i = 1; i <=prev; i++)
                     res = res*i;
-                return res;
+                return parsePostFunctionRec(res,tokens);
             case PERCENT:
                 tokens.poll();
-                return prev/100;
+                return parsePostFunctionRec(prev/100,tokens);
 
             default:
                 return prev;
