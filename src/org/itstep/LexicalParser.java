@@ -49,7 +49,7 @@ public final class LexicalParser {
                 return new Token(TokenType.PERCENT,expression.subSequence(0,1));
 
             default: {
-                switch (expression.subSequence(0, 3).toString()) {
+                switch (expression.subSequence(0, 3).toString().toLowerCase()) {
                     case "sqr":
                         return new Token(TokenType.SQUARE, expression.subSequence(0, 3));
                     case "dbl":
