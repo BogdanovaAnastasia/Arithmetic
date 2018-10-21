@@ -115,12 +115,14 @@ public class SyntaxParser {
 
     private static int parseTerminal(Deque<Token> tokens) throws UnexpectedTokenException {
         //T is N or (A), where N is number and A is a nested expression
-        Token tok = tokens.poll();
+        Token tok = tokens.peek();
         switch (tok.tokType) {
             case NUMBER:
-                return Integer.parseInt(tok.data.toString());
+                int num = parsePostFunction(tokens);
+                return num;
 
             case OPEN:
+                tokens.poll();
                 int res = parseAddition(tokens);
                 Token nextToken = tokens.poll();
                 if( TokenType.CLOSE != nextToken.tokType)
@@ -131,6 +133,38 @@ public class SyntaxParser {
                 throw new UnexpectedTokenException(tok);
         }
     }
+
+
+    private static int parsePostFunction(Deque<Token> tokens) throws UnexpectedTokenException {
+        int t = Integer.parseInt(tokens.poll().data.toString());
+        return parsePostFunctionRec(t,tokens);
+    }
+
+    private static int parsePostFunctionRec(int prev, Deque<Token> tokens) throws UnexpectedTokenException {
+        //
+        if (tokens.isEmpty())
+            return prev;
+
+        Token nextTok = tokens.peek();
+        switch(nextTok.tokType) {
+
+            case FACT:
+                tokens.poll();
+                int res = 1;
+                for (int i = 1; i <=prev; i ++)
+                    res = res*i;
+                return res;
+            case PERCENT:
+                tokens.poll();
+                return prev/100;
+
+            default:
+                return prev;
+        }
+    }
+
+
+
 
     private SyntaxParser() { }
 }
