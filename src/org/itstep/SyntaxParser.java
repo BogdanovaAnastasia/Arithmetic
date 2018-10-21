@@ -72,7 +72,7 @@ public class SyntaxParser {
     }
 
     private static int parseFunction(Deque<Token> tokens) throws UnexpectedTokenException {
-        int t = parseTerminal(tokens);
+        int t = parsePreFunction(tokens);
         return parseFunctionRec(t,tokens);
     }
 
@@ -86,12 +86,29 @@ public class SyntaxParser {
 
             case POW: {
                 tokens.poll();
-                int t = parseTerminal(tokens);
+                int t = parsePreFunction(tokens);
                 return parseFunctionRec((int)Math.pow(prev,t),tokens);
             }
 
             default:
                 return prev;
+        }
+    }
+    private static int parsePreFunction(Deque<Token> tokens) throws UnexpectedTokenException {
+        //P is N*N or (A)*(A) or T, where N is number and A is a nested expression and T is terminal
+        Token nextTok = tokens.peek();
+
+        switch (nextTok.tokType) {
+            case SQUARE:
+                tokens.poll();
+                int res1 = parseAddition(tokens);
+                return res1*res1;
+            case DOUBLENUM:
+                tokens.poll();
+                int res2 = parseAddition(tokens);
+                return res2*2;
+            default:
+                return parseTerminal(tokens);
         }
     }
 
