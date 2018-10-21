@@ -96,6 +96,7 @@ public class SyntaxParser {
     }
     private static int parsePreFunction(Deque<Token> tokens) throws UnexpectedTokenException {
         //P is N*N or (A)*(A) or T, where N is number and A is a nested expression and T is terminal
+        //or P is N*2 or (A)*2 or T, where N is number and A is a nested expression and T is terminal
         Token nextTok = tokens.peek();
 
         switch (nextTok.tokType) {
