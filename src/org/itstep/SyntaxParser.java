@@ -72,7 +72,7 @@ public class SyntaxParser {
     }
 
     private static int parseFunction(Deque<Token> tokens) throws UnexpectedTokenException {
-        int t = parsePreFunction(tokens);
+        int t = parsePostFunction(tokens);
         return parseFunctionRec(t,tokens);
     }
 
@@ -86,7 +86,7 @@ public class SyntaxParser {
 
             case POW: {
                 tokens.poll();
-                int t = parsePreFunction(tokens);
+                int t = parsePostFunction(tokens);
                 return parseFunctionRec((int)Math.pow(prev,t),tokens);
             }
 
@@ -94,20 +94,31 @@ public class SyntaxParser {
                 return prev;
         }
     }
-    private static int parsePreFunction(Deque<Token> tokens) throws UnexpectedTokenException {
+
+//    private static int parsePreFunction(Deque<Token> tokens) throws UnexpectedTokenException {
+//        int t = parseTerminal(tokens);
+//        return parsePreFunctionRec(t, tokens);
+//    }
+
+    private static int parsePreFunctionRec(Deque<Token> tokens) throws UnexpectedTokenException {
         //P is N*N or (A)*(A) or T, where N is number and A is a nested expression and T is terminal
         //or P is N*2 or (A)*2 or T, where N is number and A is a nested expression and T is terminal
+        if (tokens.isEmpty())
+            return parseTerminal(tokens);
+
         Token nextTok = tokens.peek();
 
         switch (nextTok.tokType) {
             case SQUARE:
                 tokens.poll();
-                int res1 = parseAddition(tokens);
-                return res1*res1;
+                if(nextTok.tokType == TokenType.OPEN)
+                    tokens.poll();
+                int next1 = parseTerminal(tokens);
+                return next1*next1;
             case DOUBLENUM:
                 tokens.poll();
-                int res2 = parseAddition(tokens);
-                return res2*2;
+                int next2 = parseTerminal(tokens);
+                return next2*2;
             default:
                 return parseTerminal(tokens);
         }
@@ -118,19 +129,25 @@ public class SyntaxParser {
         Token tok = tokens.poll();
         switch (tok.tokType) {
             case NUMBER:
-                int num = Integer.parseInt(tok.data.toString());
-                return parsePostFunctionRec(num,tokens);
+//                int num = Integer.parseInt(tok.data.toString());
+//                return parsePostFunctionRec(num,tokens);
+                return Integer.parseInt(tok.data.toString());
 
             case OPEN:
                 int res = parseAddition(tokens);
                 Token nextToken = tokens.poll();
                 if( TokenType.CLOSE != nextToken.tokType)
                     throw new UnexpectedTokenException(nextToken);
-                return parsePostFunctionRec(res,tokens);
+                return res;
 
             default:
                 throw new UnexpectedTokenException(tok);
         }
+    }
+
+    private static int parsePostFunction(Deque<Token> tokens) throws UnexpectedTokenException {
+        int t = parsePreFunctionRec(tokens);
+        return parsePostFunctionRec(t, tokens);
     }
 
     private static int parsePostFunctionRec(int prev, Deque<Token> tokens) throws UnexpectedTokenException {
